@@ -1,11 +1,8 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen, AccountId};
-use near_sdk::collections::{LookupMap};
+use near_sdk::collections::{LookupMap, Vector};
 
-#[cfg(target_arch = "wasm32")]
-#[global_allocator]
-static ALLOC: near_sdk::wee_alloc::WeeAlloc<'_> = near_sdk::wee_alloc::WeeAlloc::INIT;
-
+#[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Voter {
     pub account_id: AccountId,
@@ -15,19 +12,19 @@ pub struct Voter {
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct VotingContract {
-    choices: Vec<String>,
+    // choices: Vector<String>,
     total_votes: u32,
-    vote_records: LookupMap<String, Voter>
+    // vote_records: LookupMap<String, Voter>
 }
 
 #[near_bindgen]
 impl VotingContract {
-    pub fn init(choices: Vec<String>) -> Self {
-        // TODO: implement default for this
+    #[init]
+    pub fn init() -> Self {
         Self {
-            choices,
+            // choices,
             total_votes: 0,
-            vote_records: LookupMap::new(b"v".to_vec())
+            // vote_records: LookupMap::new(b"v".to_vec())
         }
     }
 
@@ -37,12 +34,22 @@ impl VotingContract {
             account_id: account_id.clone(),
             choice: choice.clone()
         };
-        self.vote_records.insert(&account_id.to_string(), &voter);
+        // self.vote_records.insert(&account_id.to_string(), &voter);
         self.total_votes += 1;
     }
 
     pub fn get_total_votes(&self) -> u32 {
         self.total_votes
+    }
+}
+
+impl Default for VotingContract {
+    fn default() -> Self {
+        Self {
+            // choices: Vector::new(b"c".to_vec()),
+            total_votes: 0,
+            // vote_records: LookupMap::new(b"v".to_vec())
+        }
     }
 }
 
@@ -69,7 +76,8 @@ mod tests {
         let context = get_context().build();
         testing_env!(context);
 
-        let mut contract = VotingContract::init(vec!["Option A".to_string(), "Option B".to_string()]);
+        // let mut contract = VotingContract::init(vec!["Option A".to_string(), "Option B".to_string()]);
+        let mut contract = VotingContract::init();
 
         // Cast votes
         contract.vote("Option A".to_string());
